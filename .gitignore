@@ -6,3 +6,5 @@ Yelp_Sentiment_Analysis/*
 Yelp_Sentiment_Analysis/Scripts/*
 !Yelp_Sentiment_Analysis/Scripts/
 !Yelp_Sentiment_Analysis/Scripts/fake_reviews.ipynb
+/myenv/
+/src/.ipynb_checkpoints/
