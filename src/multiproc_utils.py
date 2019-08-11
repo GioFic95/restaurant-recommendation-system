@@ -1,3 +1,11 @@
+import pandas as _pd
+import time as _time
+import os as _os
+
+
+_cuisines_unique = ['Chinese', 'Japanese', 'Mexican', 'Italian', 'Others', 'American', 'Korean', 'Mediterranean', 'Thai', 'Asian Fusion']
+
+
 def user_business_features(iterable):
     df_in, df_out_name = iterable
     
@@ -38,11 +46,12 @@ def user_business_features(iterable):
                'av_rat_korean_cuisine_real', 'av_rat_mediterranean_cuisine_real', 'av_rat_thai_cuisine_real', 
                'av_rat_asianfusion_cuisine_real']
 
-
         df_out.loc[uid, cols] = vals
 
         if (count % 1000) == 0:
             percent = (count / tot) * 100
-            print("process {4}\t- row {0}/{1}\t- {2:.3f}%\t- {3}".format(count, tot, percent, time.asctime(), os.getppid()))
+            print("process {4}\t- row {0}/{1}\t- {2:.3f}%\t- {3}".format(count, tot, percent, _time.asctime(), _os.getppid()))
 
         count += 1
+
+    df_out.to_pickle("../dataset/m2_n9/tmp/" + df_out_name + ".pickle")
