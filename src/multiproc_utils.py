@@ -7,9 +7,7 @@ _cuisines_unique = ['Chinese', 'Japanese', 'Mexican', 'Italian', 'Others', 'Amer
 
 
 def user_business_features(iterable):
-    df_in, df_out_name = iterable
-    
-    df_out = _pd.read_pickle("../dataset/m2_n9/tmp/" + df_out_name + ".pickle") # reads df_out from tmp dir, file df_out_name
+    df_in, df_out, df_out_name = iterable
     
     count = 1
     tot = len(df_in)
@@ -54,4 +52,4 @@ def user_business_features(iterable):
 
         count += 1
 
-    df_out.to_pickle("../dataset/m2_n9/tmp/" + df_out_name + ".pickle")
+    df_out.to_pickle(df_out_name)
