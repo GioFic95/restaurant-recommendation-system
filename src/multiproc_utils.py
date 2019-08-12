@@ -67,3 +67,38 @@ def user_business_features(iterable):
         print("Unexpected error:", sys.exc_info()[0])
     finally:
         df_out.to_pickle(df_out_name)
+
+
+
+def sub_user_business_cuisine_average_test_training(iterable):
+    df_in, df_out, df_out_name = iterable
+
+    is_nan = True
+    count = 1
+    tot = len(df_in)
+    print("tot:", tot)
+
+    for index, row in df_in.iterrows():
+        if not row.isna().all():
+            uid = index
+            vals = []
+
+            vals.append(row['cuisine_av_hist'])
+            vals.append(row['cuisine_av_hist_bin'])
+            vals.append(row['cuisine_av_hist_real'])
+
+            cols = ['cuisine_av_hist', 'cuisine_av_hist_bin', 'cuisine_av_hist_real']
+
+            df_out.loc[uid, cols] = vals
+
+            if (count % 1000) == 0:
+                percent = (count / tot) * 100
+                print("process {4}\t- row {0}/{1}\t- {2:.3f}%\t- {3}".format(count, tot, percent, _time.asctime(), _os.getpid()))
+
+            count += 1
+
+        else:
+            count += 1
+            continue    
+
+    df_out.to_pickle(df_out_name)
