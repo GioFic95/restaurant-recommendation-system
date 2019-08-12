@@ -6,9 +6,8 @@ import os as _os
 _cuisines_unique = ['Chinese', 'Japanese', 'Mexican', 'Italian', 'Others', 'American', 'Korean', 'Mediterranean', 'Thai', 'Asian Fusion']
 
 
-def user_business_features(iterable):
-    df_in, df_out, df_out_name = iterable
-    
+def sub_user_business_features(df_in, df_out, df_out_name):
+    is_nan = True
     count = 1
     tot = len(df_in)
     print("tot:", tot)
@@ -48,10 +47,23 @@ def user_business_features(iterable):
 
             if (count % 1000) == 0:
                 percent = (count / tot) * 100
-                print("process {4}\t- row {0}/{1}\t- {2:.3f}%\t- {3}".format(count, tot, percent, _time.asctime(), _os.getppid()))
+                print("process {4}\t- row {0}/{1}\t- {2:.3f}%\t- {3}".format(count, tot, percent, _time.asctime(), _os.getpid()))
 
             count += 1
         else:
+            if is_nan:
+                print("is nan:", row)
+                is_nan = False
+            count += 1
             continue
 
-    df_out.to_pickle(df_out_name)
+
+def user_business_features(iterable):
+    df_in, df_out, df_out_name = iterable
+    
+    try:
+        sub_user_business_features(df_in, df_out, df_out_name)
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+    finally:
+        df_out.to_pickle(df_out_name)
