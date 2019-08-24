@@ -2,6 +2,7 @@ import pandas as _pd
 import time as _time
 import os as _os
 import sys as _sys
+import traceback as _traceback
 from sklearn.metrics.pairwise import cosine_similarity as _cosine_similarity
 
 _cuisines_unique = ['Chinese', 'Japanese', 'Mexican', 'Italian', 'Others', 'American', 'Korean', 'Mediterranean', 'Thai', 'Asian Fusion']
@@ -82,7 +83,7 @@ def user_business_features(iterable):
     try:
         sub_user_business_features(df_in, df_out)
     except:
-        print("Unexpected error:", _sys.exc_info()[0])
+        print("Unexpected error:", _traceback.format_exc())
     finally:
         df_out.to_pickle(df_out_name)
 
@@ -99,22 +100,22 @@ def sub_set_coll_scores(review_set, users, restaurants):
         a_r = restaurants.loc[rest_id, 'average_stars']
         user_sim = _cosine_similarity(users.loc[user_id, cols_std].values.reshape(1,-1), users[cols_std])
         user_sim = _pd.Series(data=user_sim[0], index=users.index)
-        numerator = (user_sim * (a_u_r - a_r)).sum()
-        denominator = user_sim.sum()
+        numerator = (user_sim * (a_u_r - a_r)).sum() -  1 * (a_u_r_bin - a_r_bin)
+        denominator = user_sim.sum() -1
         
         a_u_r_bin = row['cuisine_av_hist_bin']
         a_r_bin = restaurants.loc[rest_id, 'average_stars_bin']
         user_sim = _cosine_similarity(users.loc[user_id, cols_bin].values.reshape(1,-1), users[cols_bin])
         user_sim = _pd.Series(data=user_sim[0], index=users.index)
-        numerator_bin = (user_sim * (a_u_r_bin - a_r_bin)).sum()
-        denominator_bin = user_sim.sum()
+        numerator_bin = (user_sim * (a_u_r_bin - a_r_bin)).sum() -  1 * (a_u_r_bin - a_r_bin)
+        denominator_bin = user_sim.sum() -1
         
         a_u_r_real = row['cuisine_av_hist_real']
         a_r_real = restaurants.loc[rest_id, 'average_stars_real']
         user_sim = _cosine_similarity(users.loc[user_id, cols_real].values.reshape(1,-1), users[cols_real])
         user_sim = _pd.Series(data=user_sim[0], index=users.index)
-        numerator_real = (user_sim * (a_u_r_real - a_r_real)).sum()
-        denominator_real = user_sim.sum()
+        numerator_real = (user_sim * (a_u_r_real - a_r_real)).sum() -  1 * (a_u_r_bin - a_r_bin)
+        denominator_real = user_sim.sum() -1
         
         out_cols = ['coll_score', 'coll_score_bin', 'coll_score_real']
         vals = [numerator/denominator, numerator_bin/denominator_bin, numerator_real/denominator_real]
@@ -134,7 +135,7 @@ def set_coll_scores(iterable):
     try:
         sub_set_coll_scores(review_set, users, restaurants)
     except:
-        print("Unexpected error:", _sys.exc_info()[0])
+        print("Unexpected error:", _traceback.format_exc())
     finally:
         review_set.to_pickle(review_split_name)
 
