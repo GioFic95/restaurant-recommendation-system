@@ -10,3 +10,4 @@ Yelp_Sentiment_Analysis/Scripts/*
 /src/.ipynb_checkpoints/
 /dataset.zip
 /src/old/
+/src/__pycache__/
