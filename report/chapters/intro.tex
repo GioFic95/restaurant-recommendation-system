@@ -1,0 +1,50 @@
+% !TeX spellcheck = en_US
+
+\section{Introduction}
+
+\subsection{Problem description} \label{sec:problem}
+
+We have devised a recommendation system for restaurants based on the \href{https://www.yelp.com/dataset/challenge}{Yelp Dataset Challenge}.
+
+Our aim is to predict if a certain user will like a certain restaurant, depending on characteristics of the restaurant, user's taste (derived from his previous reviews), opinion of similar users (who gave similar votes to similar restaurants), trustworthiness of the reviews.
+
+In order to do so, we studied three papers, that we used as the basis of our work:
+\begin{enumerate}
+	\item \href{https://www.semanticscholar.org/paper/Restaurant-Recommendation-System-Gandhe/093cecc3e53f2ba4c0c466ad3d8294ba64962050}{Restaurant Recommendation System, Ashish Gandhe} [\ref{Gandhe}];
+	\item \href{https://medium.com/@zhiwei_zhang/final-blog-642fb9c7e781}{Machine Learning and Visualization with Yelp Dataset, Zhiwei Zhang} (with \href{https://github.com/zzhang83/Yelp_Sentiment_Analysis}{her repo}) [\ref{Zhang}];
+	\item \href{https://www.kaggle.com/wenqihou828/recommendation-for-yelp-users-itself}{Recommendation for yelp users itself, Wenqi Hou, Gauravi Saha, Manying Tsang} [\ref{Hou}].
+\end{enumerate}
+
+We started from the data cleaning performed by Hou, Saha and Tsang (3), then we applied the SVM model proposed by Zhang (2) to identify fake reviews, and assigned to each review a ``truth score'' (an indicator of the trustworthiness of the review), so that we could use this score as a weight in the computation of the historical features described by Gandhe (1).
+
+After some further preprocessing we applied three machine learning models to the obtained dataset and got our predictions.
+
+\subsection{Datasets} \label{sec:datasets}
+
+The Yelp dataset we used is a available \href{https://www.kaggle.com/yelp-dataset/yelp-dataset}{here} and described in detail \href{https://www.yelp.com/dataset/documentation/main}{here}.
+
+It is composed of five JSON files:
+\begin{enumerate}
+	\item \textit{business.json} contains data about businesses (we've narrowed our search to restaurants only, but there were hotels and shops too) including location data, attributes and categories;
+	\item \textit{review.json} contains full review text, the ids of the user who wrote it and of the restaurant it was about, and the number of stars given as a vote (we used the texts only for the detection of deceptive reviews);
+	\item \textit{user.json} contains data about users, such as popularity, friends and name;
+	\item \textit{checkin.json} contains the checkins on a business (we discarded this dataset);
+	\item \textit{tip.json} contains tips written by a user on a business (we dropped the text and kept only the ``compliment count'', as a sign of the reliability of a user).
+\end{enumerate}
+
+The most significant features are written in or obtained from the review file (2), since the label we want to predict, likes/dislikes, is calculated from the number of stars assigned by a user to a restaurant, and so are some of the historical features presented in Ghande [\ref{Gandhe}] and discussed in a separate section [\ref{sec:hist-feat}].
+
+The review dataset is also the biggest one, with more than 1 million reviews, spanning from 2014 to 2018, and more than 5GB in size.
+
+\subsection{Tools used} \label{sec:tools}
+
+We summarize and motivate the tools used for this project:
+\begin{itemize}
+	\item \textbf{\href{https://www.python.org/}{Python 3}}: the most widely used programming language for machine learning tasks, we used version 3.6 for compatibility with Tensorflow GPU;
+	\item \textbf{\href{https://jupyter.org/}{Jupyter Notebook}}: we decided to write our main scripts in a notebook since it's more readable and comments are clearer, even if it gives some problems, with the \href{https://docs.python.org/3.6/library/multiprocessing.html}{multiprocessing library} for example;
+	\item \textbf{\href{http://pandas.pydata.org}{Pandas}}: we used this library to read and manage the datasets, but it appeared to be inherently inefficient, since it doesn't do anything to overcome the Python GIL, so we tried to parallelize it using \href{https://modin.readthedocs.io/en/latest/index.html}{Modin} and \href{https://numba.pydata.org/}{Numba}, but also those attempts have failed, so we used the previously mentioned multiprocessing module of the standard library;
+	\item \textbf{\href{http://scikit-learn.org}{Scikit-Learn}}: it provides ready-to-use implementations of many ML non-neural models;
+	\item \textbf{\href{https://www.tensorflow.org/}{TensorFlow GPU}}: it provides the implementations of neural networks.
+\end{itemize}
+
+Thus, most of our code is in the file \texttt{/src/main\_notebook-multiprocess.ipynb}, the functions that are explicitly run on many processes are in \texttt{src/multiproc\_utils.py}, the portion of preprocessing customized from [\ref{Hou}] is in \texttt{/src/recommendation\_system\_preprocessing.ipynb} and the model for finding deceptive reviews from [\ref{Zhang}] is in \texttt{/Yelp\_Sentiment\_Analysis/Scripts/fake\_reviews.ipynb}.

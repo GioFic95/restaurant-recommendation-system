@@ -1,0 +1,20 @@
+% !TeX spellcheck = en_US
+
+\section{Experiments and evaluation}
+
+Qui descriviamo tutti i test che abbiamo fatto per ogni modello, con parametri e risultati.
+
+\subsection{Linear Support Vector Machine}
+\begin{itemize}
+    \item addestramento su 1/2 training set, 5000 iterazioni, nessun filtro città o categorie → best training score 0.732, best test score 0.701
+    \item addestramento su 1/3 training set, 10000 iterazioni, nessun filtro città o categorie → best training score 0.725, best test score 0.736
+    \item addestramento su 1/3 training set, 10000 iterazioni, filtro città più di 100 occorrenze, filtro categorie più di 200 occorrenze → best training score 0.722, best test score 0.706
+    \item addestramento su training set completo, 50000 iterazioni, filtro città e categorie più di 100 occorrenze, nuova feature basata su score di utenti simili → best training score 0.743, best test score 0.737
+\end{itemize}
+mai raggiunta convergenza
+
+\subsection{Random Forests}
+grid search con 900 parametri
+
+\subsection{CNN???}
+bla bla

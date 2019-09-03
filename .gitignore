@@ -11,3 +11,12 @@ Yelp_Sentiment_Analysis/Scripts/*
 /dataset.zip
 /src/old/
 /src/__pycache__/
+/report/report.toc
+/report/report.lol
+/report/report.lot
+/report/report.log
+/report/report.tex
+/report/report.out
+/report/report.aux
+/report/report.synctex.gz
+/report/report.lof
