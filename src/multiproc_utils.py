@@ -89,6 +89,17 @@ def user_business_features(iterable):
         df_out.to_pickle(df_out_name)
 
 
+def aggregate(grouped):
+    d = {}
+    non_fake = _np.ma.masked_where(grouped['bin_truth_score']<=0, grouped['stars']).compressed()
+    
+    d['stars'] = grouped['stars'].mean()
+    d['stars_bin'] = non_fake.mean()
+    d['stars_real'] = _np.average(grouped['stars'], weights=grouped['real_truth_score'])
+    
+    return _pd.Series(d, index=['stars', 'stars_bin', 'stars_real'])
+
+
 def sub_set_coll_scores(review_set, review_hist, users, restaurants):
     count = 1
     tot = review_set.shape[0]
@@ -103,9 +114,10 @@ def sub_set_coll_scores(review_set, review_hist, users, restaurants):
         if old_rest_id != rest_id:
             review_rest_new = review_set.loc[review_set.business_id == rest_id, rev_cols]
             review_rest_old = review_hist.loc[review_hist.business_id == rest_id, rev_cols]
-            review_rest = _pd.concat([review_rest_new, review_rest_old]).set_index('user_id').drop(user_id)
+            review_rest = _pd.concat([review_rest_new, review_rest_old])
+            review_rest = review_rest.groupby('user_id').apply(aggregate).drop(user_id)
             user_rest = users.loc[users.index.isin(review_rest.index)]
-            assert review_rest.shape[0] == user_rest.shape[0], "different shapes"
+            assert review_rest.shape[0] == user_rest.shape[0], "different shapes" + str(review_rest.shape) + " vs " + str(user_rest.shape)
 
         a_u = row['cuisine_av_hist']
         a_r = restaurants.loc[rest_id, 'average_stars']
@@ -118,7 +130,7 @@ def sub_set_coll_scores(review_set, review_hist, users, restaurants):
 
         a_u_bin = row['cuisine_av_hist_bin']
         a_r_bin = restaurants.loc[rest_id, 'average_stars_bin']
-        a_u_r_bin = review_rest['stars'] * review_rest['bin_truth_score']
+        a_u_r_bin = review_rest['stars_bin']
         user_sim = _cosine_similarity(curr_user[cols_bin].values.reshape(1, -1), user_rest[cols_bin])
         user_sim = _pd.Series(data=user_sim[0], index=users.index)
         user_sim.where(user_sim > 0.5, 0, inplace=True)
@@ -127,7 +139,7 @@ def sub_set_coll_scores(review_set, review_hist, users, restaurants):
 
         a_u_real = row['cuisine_av_hist_real']
         a_r_real = restaurants.loc[rest_id, 'average_stars_real']
-        a_u_r_real = review_rest['stars'] * review_rest['real_truth_score']
+        a_u_r_real = review_rest['stars_real']
         user_sim = _cosine_similarity(curr_user[cols_real].values.reshape(1, -1), user_rest[cols_real])
         user_sim = _pd.Series(data=user_sim[0], index=users.index)
         user_sim.where(user_sim > 0.5, 0, inplace=True)
