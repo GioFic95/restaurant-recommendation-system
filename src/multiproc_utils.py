@@ -1,4 +1,5 @@
 import pandas as _pd
+import numpy as _np
 import time as _time
 import os as _os
 import traceback as _traceback
@@ -22,7 +23,8 @@ cols_real = ['av_rat_chinese_cuisine_real', 'av_rat_japanese_cuisine_real', 'av_
            'av_rat_korean_cuisine_real', 'av_rat_mediterranean_cuisine_real', 'av_rat_thai_cuisine_real', 
            'av_rat_asianfusion_cuisine_real']
 
-rev_cols = ['user_id', 'bin_truth_score', 'real_truth_score']
+rev_cols = ['user_id', 'stars', 'bin_truth_score', 'real_truth_score']
+
 
 def sub_user_business_features(df_in, df_out):
     is_nan = True
@@ -91,7 +93,7 @@ def user_business_features(iterable):
 
 def aggregate(grouped):
     d = {}
-    non_fake = _np.ma.masked_where(grouped['bin_truth_score']<=0, grouped['stars']).compressed()
+    non_fake = _np.ma.masked_where(grouped['bin_truth_score'] <= 0, grouped['stars']).compressed()
     
     d['stars'] = grouped['stars'].mean()
     d['stars_bin'] = non_fake.mean()
@@ -114,41 +116,53 @@ def sub_set_coll_scores(review_set, review_hist, users, restaurants):
         if old_rest_id != rest_id:
             review_rest_new = review_set.loc[review_set.business_id == rest_id, rev_cols]
             review_rest_old = review_hist.loc[review_hist.business_id == rest_id, rev_cols]
-            review_rest = _pd.concat([review_rest_new, review_rest_old])
-            review_rest = review_rest.groupby('user_id').apply(aggregate).drop(user_id)
-            user_rest = users.loc[users.index.isin(review_rest.index)]
-            assert review_rest.shape[0] == user_rest.shape[0], "different shapes" + str(review_rest.shape) + " vs " + str(user_rest.shape)
+            tmp_review_rest = _pd.concat([review_rest_new, review_rest_old])
+            tmp_review_rest = tmp_review_rest.groupby('user_id').apply(aggregate)
+            tmp_user_rest = users.loc[users.index.isin(tmp_review_rest.index)]
+
+        review_rest = tmp_review_rest.drop(user_id)
+        user_rest = tmp_user_rest.drop(user_id)
+        assert review_rest.shape[0] == user_rest.shape[0], "different shapes: " + str(review_rest.shape) + " vs " + str(user_rest.shape)
 
         a_u = row['cuisine_av_hist']
-        a_r = restaurants.loc[rest_id, 'average_stars']
-        a_u_r = review_rest['stars']
-        user_sim = _cosine_similarity(curr_user[cols_std].values.reshape(1, -1), user_rest[cols_std])
-        user_sim = _pd.Series(data=user_sim[0], index=users.index)
-        user_sim.where(user_sim > 0.5, 0, inplace=True)
-        numerator = (user_sim * (a_u_r - a_r)).sum()
-        denominator = user_sim.sum() - 1
-
         a_u_bin = row['cuisine_av_hist_bin']
-        a_r_bin = restaurants.loc[rest_id, 'average_stars_bin']
-        a_u_r_bin = review_rest['stars_bin']
-        user_sim = _cosine_similarity(curr_user[cols_bin].values.reshape(1, -1), user_rest[cols_bin])
-        user_sim = _pd.Series(data=user_sim[0], index=users.index)
-        user_sim.where(user_sim > 0.5, 0, inplace=True)
-        numerator_bin = (user_sim * (a_u_r_bin - a_r_bin)).sum()
-        denominator_bin = user_sim.sum() - 1
-
         a_u_real = row['cuisine_av_hist_real']
-        a_r_real = restaurants.loc[rest_id, 'average_stars_real']
-        a_u_r_real = review_rest['stars_real']
-        user_sim = _cosine_similarity(curr_user[cols_real].values.reshape(1, -1), user_rest[cols_real])
-        user_sim = _pd.Series(data=user_sim[0], index=users.index)
-        user_sim.where(user_sim > 0.5, 0, inplace=True)
-        numerator_real = (user_sim * (a_u_r_real - a_r_real)).sum()
-        denominator_real = user_sim.sum() - 1
+
+        if user_rest.empty:
+            res = 0
+            res_bin = 0
+            res_real = 0
+
+        else:
+            a_r = restaurants.loc[rest_id, 'average_stars']
+            a_u_r = review_rest['stars']
+            user_sim = _cosine_similarity(curr_user[cols_std].values.reshape(1, -1), user_rest[cols_std])
+            user_sim = _pd.Series(data=user_sim[0], index=user_rest.index)
+            user_sim.where(user_sim > 0.5, 0, inplace=True)
+            numerator = (user_sim * (a_u_r - a_r)).sum()
+            denominator = user_sim.sum()
+            res = numerator / denominator
+
+            a_r_bin = restaurants.loc[rest_id, 'average_stars_bin']
+            a_u_r_bin = review_rest['stars_bin'].fillna(a_r_bin)
+            user_sim = _cosine_similarity(curr_user[cols_bin].values.reshape(1, -1), user_rest[cols_bin])
+            user_sim = _pd.Series(data=user_sim[0], index=user_rest.index)
+            user_sim.where(user_sim > 0.5, 0, inplace=True)
+            numerator_bin = (user_sim * (a_u_r_bin - a_r_bin)).sum()
+            denominator_bin = user_sim.sum()
+            res_bin = numerator_bin / denominator_bin
+
+            a_r_real = restaurants.loc[rest_id, 'average_stars_real']
+            a_u_r_real = review_rest['stars_real']
+            user_sim = _cosine_similarity(curr_user[cols_real].values.reshape(1, -1), user_rest[cols_real])
+            user_sim = _pd.Series(data=user_sim[0], index=user_rest.index)
+            user_sim.where(user_sim > 0.5, 0, inplace=True)
+            numerator_real = (user_sim * (a_u_r_real - a_r_real)).sum()
+            denominator_real = user_sim.sum()
+            res_real = numerator_real / denominator_real
 
         out_cols = ['coll_score', 'coll_score_bin', 'coll_score_real']
-        vals = [a_u + numerator / denominator, a_u_bin + numerator_bin / denominator_bin,
-                a_u_real + numerator_real / denominator_real]
+        vals = [a_u + res, a_u_bin + res_bin, a_u_real + res_real]
         review_set.loc[rid, out_cols] = vals
 
         if count % 1000 == 0:
