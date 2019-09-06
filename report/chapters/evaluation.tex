@@ -2,9 +2,65 @@
 
 \section{Experiments and evaluation}
 
-Qui descriviamo tutti i test che abbiamo fatto per ogni modello, con parametri e risultati.
+Let's describe each test we made for each model.
 
 \subsection{Linear Support Vector Machine}
+
+\subsubsection{Implementation}
+
+To implement the linear SVM method we used Scikit Learn's \href{https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html}{LinearSVC}.
+
+The main decision to make on the linear SVM is how to configure the parameters of the model, so we decided to perform a grid search (always using a \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html}{Scikit Learn module}) to find the best configuration of the main parameter, $C$.
+
+We created an instance of the Linear SVM model to be used in grid search, then performed a grid search training phase to get the best estimator, i.e. the linear SVM instance with the parameter $C$ set to the best value among those proposed among the grid parameters.
+
+For the grid search, only a portion of the training set was used, in order to improve the parallelizability of the procedure, since each parallel instance require its own copy of the dataset:\\
+\colorbox{backgray}{\lstinline|sub\_train\_set = train\_set[:round(train\_set.shape[0]/x)]|}
+where \texttt{x} was tested with values \texttt{3,2,1}.
+
+The code used for the instance of linear SVM and for grid search is the following:
+
+\begin{lstlisting}[caption={Linear SVM model},label={lst:svm-model}]
+#Linear SVM model
+svc_classifier = LinearSVC(random_state = 0, max_iter = 50000)
+
+#Grid Search model
+param_grid = {'C':[0.001,0.01,0.1,0.25,0.5,0.75,1,10,100,1000]}
+
+grid = GridSearchCV(estimator = svc_classifier, 
+                    param_grid = param_grid, 
+                    refit = True, 
+                    verbose = 2, 
+                    cv = 3, 
+                    error_score = np.nan, 
+                    n_jobs = -1, 
+                    pre_dispatch = 6)
+
+
+grid.fit(sub_train_set.drop(columns=['likes',  'stars_review', 'review_id',
+                                     'user_id', 'business_id']), 
+         sub_train_set['likes'])                     
+\end{lstlisting} 
+
+Finally, we trained the obtained estimator on the entire dataset in order to learn about the target label and we performed the prediction on the test set. The relevant code is the following:
+
+\begin{lstlisting}[caption={Linear SVM training and predictions},label={lst:svm-fit}]
+#Estimator to train and predict the label
+best_model = grid.best_estimator_
+
+#Best estimator training
+best_model.fit(train_set.drop(columns=['likes', 'stars_review',
+                                       'review_id', 'user_id', 'business_id']),
+               train_set['likes'])
+
+#Prediction of the target label
+predic = best_model.predict(test_set.drop(columns=['likes', 'stars_review',
+                                                   'review_id', 'user_id', 
+                                                   'business_id']))
+\end{lstlisting}
+
+\subsubsection{Results}
+
 \begin{itemize}
     \item addestramento su 1/2 training set, 5000 iterazioni, nessun filtro città o categorie → best training score 0.732, best test score 0.701
     \item addestramento su 1/3 training set, 10000 iterazioni, nessun filtro città o categorie → best training score 0.725, best test score 0.736
@@ -13,8 +69,173 @@ Qui descriviamo tutti i test che abbiamo fatto per ogni modello, con parametri e
 \end{itemize}
 mai raggiunta convergenza
 
-\subsection{Random Forests}
-grid search con 900 parametri
 
-\subsection{CNN???}
-bla bla
+\subsection{Random Forest}
+
+\subsubsection{Implementation}
+
+To implement the ensemble random forest method we used Scikit Learn's \href{https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}{RandomForestClassifier}.
+
+The main decision to take about the random forest is how to configure the parameters of the model, so we decided to perform a grid search (always using Scikit Learn's \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html}{GridSearchCV}) to find the best configuration of the main parameters. To create the parameter grid we were partially inspired by \href{https://www.kaggle.com/sociopath00/random-forest-using-gridsearchcv}{this kernel}.
+
+We used two instances of RandomForestClassifier: one to make the grid search on half of the train set and one to train the model on the whole train set and make the predictions.
+
+The code used for the first instance of random forest and for grid search is the following:
+
+\begin{lstlisting}[caption={Random Forest model},label={lst:rf-model}]
+#First Random Forest model
+random_forest = RandomForestClassifier(n_jobs = -1, random_state = 0)
+
+#Grid Search model
+param_grid = {'bootstrap': [True, False],
+              'max_depth': [10, 30, 50],
+              'min_samples_leaf': [1, 2, 4],
+              'min_samples_split': [2, 5, 10],
+              'n_estimators': [200, 500, 1000],
+              'criterion': ['gini', 'entropy']}
+
+grid = GridSearchCV(estimator = random_forest, 
+                    param_grid = param_grid, 
+                    refit = False, 
+                    verbose = 5, 
+                    cv = 3, 
+                    error_score = _np.nan, 
+                    n_jobs = -1, 
+                    pre_dispatch = 6)
+
+sub_train_set = train_set[:round(train_set.shape[0]/2)]
+
+grid.fit(sub_train_set.drop(columns=['likes', 'stars_review', 'review_id', 
+                                     'user_id', 'business_id']),
+                            sub_train_set['likes'])
+\end{lstlisting}
+
+Once the grid search is completed, we have a dictionary whose keys are the parameters used in the grid and whose values are the best values found for the corresponding parameters.\\
+So we re-instantiated the random forest classifier by setting its parameters with the best values obtained.\\
+Then the model is trained on the whole train set and makes predictions on the whole test set.
+
+The relevant code is as follows:
+
+\begin{lstlisting}[caption={Random Forest training and predictions}, label={lst:rf-fit}]
+#Second Random Forest instances with the best value of the params
+params = grid.best_params_
+params['n_jobs'] = -1
+params['verbose'] = 5
+best_model = RandomForestClassifier(**params)
+
+#Random Forest training
+best_model.fit(train_set.drop(columns=['likes', 
+                                       'stars_review', 
+                                       'review_id', 
+                                       'user_id', 
+                                       'business_id']),
+               train_set['likes'])
+
+#Random Forest prediction 
+predic = best_model.predict(test_set.drop(columns=['likes', 'stars_review',
+                                                   'review_id', 'user_id', 
+                                                   'business_id']))
+\end{lstlisting}
+
+
+\subsubsection{Results}
+
+
+
+\subsection{Feedforward Neural Network}
+
+\subsubsection{Implementation}
+
+To implement the neural network we used Tensorflow exploiting Keras' \href{https://www.tensorflow.org/api_docs/python/tf/keras/Sequential}{Sequential model} and \href{https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense}{Dense layer}, and developed the model based on this article: \href{https://medium.com/datadriveninvestor/building-neural-network-using-keras-for-classification-3a3656c726c1}{\textit{Building Neural Network using Keras for Classification}, Renu Khandelwal} [\ref{Khandelwal}].
+
+We implemented the neural network using the following code:
+
+\begin{lstlisting}[caption={Neural Network model},label={lst:nn-model}]
+classifier = Sequential()
+
+#First Hidden Layer
+classifier.add(Dense(number_hidden_neurons, 
+                     activation = 'relu', 
+                     kernel_initializer = 'random_normal', 
+                     input_dim = number_features))
+
+#Second Hidden Layer
+classifier.add(Dense(number_hidden_neurons, 
+                     activation = 'relu', 
+                     kernel_initializer = 'random_normal'))
+
+#Third Hidden Layer
+classifier.add(Dense(number_hidden_neurons, 
+                     activation = 'relu', 
+                     kernel_initializer = 'random_normal'))
+
+#Output Layer
+classifier.add(Dense(1, 
+                     activation = 'sigmoid', 
+                     kernel_initializer = 'random_normal'))
+
+#Compiling the neural network
+classifier.compile(optimizer = 'adam', 
+                   loss = 'binary_crossentropy', 
+                   metrics = ['accuracy'])
+\end{lstlisting}
+
+The first hidden layer is added to the model with the parameter \texttt{input\_dim=n\_features}, that represents the number of neurons per input layer needed (one per feature). The second and third hidden layers are added to the model without the previous parameter.
+
+The main decision to take for each hidden layer is the number of neurons that make it up; we decided to use the following formula (from \href{https://stats.stackexchange.com/questions/181/how-to-choose-the-number-of-hidden-layers-and-nodes-in-a-feedforward-neural-netw}{this thread} on StackExchange):
+
+\begin{equation}
+N_h = \frac{N_s}{(\alpha * (N_i + N_o))}
+\end{equation}
+
+where:
+\begin{itemize}
+	
+	\item[-] $N_h$ is the number of hidden neurons.
+	
+	\item[-] $N_i$ is the number of input neurons.
+	
+	\item[-] $N_o$ is the number of output neurons.
+	
+	\item[-] $N_s$ is the number of train samples.
+	
+	\item[-] $\alpha$ an arbitrary scaling factor, usually between 5 and 10.  
+	
+\end{itemize}
+
+In this way, the number of hidden neurons is between the number of neurons in the input layer and the number of neurons in the output layer.
+
+For the output layer we configured only one neuron: the task requires binary classification (yes/no) and therefore we have the probability that it is yes: $P(yes) = 1 - P(no)$.\\
+We could use two neurons in the output layer but it would still represent the same information.
+
+For the training part, Keras was always used, with the following code:
+
+\begin{lstlisting}[caption={Neural Network training},label={lst:nn-fit}]
+#Fitting the data to the training dataset
+classifier.fit(train_set.drop(columns = ['likes', 'stars_review', 
+                                         'review_id', 'user_id', 
+                                         'business_id']), 
+               train_set['likes'], 
+               validation_split = 0.3, 
+               batch_size = 100, 
+               epochs = 100)
+\end{lstlisting}
+
+In training, the model performs 100 iterations with one size for each large batch 100. A part of the training test will be used as a validation test, in order to have a 70 - 30 ratio.
+
+In the prediction part, therefore we use Keras once again, with the following code:
+
+\begin{lstlisting}[caption={Neural Network predictions},label={lst:nn-pred}]
+prediction = classifier.predict(test_set.drop(columns = ['likes', 
+                                                         'stars_review', 'review_id', 'user_id', 
+                                                         'business_id']))
+
+#Result binarization
+binary_prediction = binarize(prediction, threshold = 0.5)
+\end{lstlisting}
+
+With the \texttt{predict} method the target label is predicted resulting in a probability vector formed by one element. We therefore used the Scikit Learns' \href{https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.binarize.html}{\texttt{binarize} function} to transform the probabilistic result into a binary result using a threshold of 0.5: if the result is below or equal to threshold it is replaced with 0 (no), otherwise with 1 (yes).
+
+
+\subsubsection{Results}
+
