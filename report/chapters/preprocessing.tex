@@ -166,8 +166,6 @@ We have three versions for this feature too, with the same meaning described in 
 
 \subsection{Dimensionality reduction and further preprocessing}
 
-rimosso alcuni valori delle features categoriali con troppi valori (perché se no scoppiava la RAM), riempito i null con media o moda, convertito features categoriali in numeriche.
-
 At this point we had all the features we needed, so, that was the moment of preparing the data so that they were ready to be fed to the models. The next steps we performed were the following:
 \begin{enumerate}
 	\item We joined all the interesting datasets in only one, to have all the needed features together and one review per row (the \textit{checkin} dataset was discarded because not useful);
@@ -182,10 +180,10 @@ At this point we had all the features we needed, so, that was the moment of prep
 	\end{itemize}
 \end{enumerate}
 
-Now let's describe what we have done for dimensionality reduction.
+Since our dataset was huge (about 7GB), we decided to apply some dimensionality reduction in order to make it fit in RAM, especially when applying grid search (it turned out that to make parallelism more efficient the Scikit Learn's method for grid search tries to make a copy of the dataset for each parallel job that it runs).\\
 We had two features that seem to be quite important and that could assume hundreds of values: \texttt{city} and \texttt{categories}.
-First of all, we plotted the distribution of the values of these features, as shown in the figures [\ref{fig:city-distribution}] and [\ref{fig:category-distribution}]: it appears that there are few very frequent values (such as \texttt{`Las Vegas', `Phoenix', `Toronto'} for the cities and \texttt{`Food', `Nightlife', `Bars'} for the categories) and lots of values that are pretty rare, thus we decided to cut the less frequent values before proceeding with one hot encoding, so we choose a threshold $\theta=100$ and replaced all the values that occur less than $\theta$ times with \texttt{`other'}.\\
-Let's note that, since after one hot encoding we have one column for each category, the previously created \texttt{cuisine} (see \nameref{sec:data-clean} section) has become useless, so we removed it.\\
+First of all, we plotted the distribution of the values of these features, as shown in the figures [\ref{fig:city-distribution}] and [\ref{fig:category-distribution}]: it appears that there are few very frequent values (such as \texttt{'Las Vegas', 'Phoenix', 'Toronto'} for the cities and \texttt{'Food', 'Nightlife', 'Bars'} for the categories) and lots of values that are pretty rare, thus we decided to cut the less frequent values before proceeding with one hot encoding, so we choose a threshold $\theta=100$ and replaced all the values that occur less than $\theta$ times with \texttt{'other'}.\\
+Let's note that, since after one hot encoding we have one column for each category, the previously created \texttt{cuisine} feature (see \nameref{sec:data-clean} section) has become useless, so we removed it.\\
 In the tables [\ref{tab:city-frequencies}] and [\ref{tab:category-frequencies}] are listed the ten most frequent and ten least frequent cities/categories.
 
 \begin{figure}[h!]
@@ -269,3 +267,6 @@ In the tables [\ref{tab:city-frequencies}] and [\ref{tab:category-frequencies}] 
 		\label{tab:category-frequencies}
 	}
 \end{table}
+
+When parameter tuning was finished and grid search wasn't needed anymore, we tried to fit the obtained models with the original dataset, without applying dimensionality reduction and restricting the potentially dangerous use of \texttt{OrdinalEncoder} \texttt{postal\_code} only, in order to see if we could get some improvement in performances of the models.\\
+The procedure we followed and the results we obtained are explained in more detail in section \nameref{sec:experiments}.
