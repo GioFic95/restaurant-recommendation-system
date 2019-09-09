@@ -305,11 +305,13 @@ With the \texttt{predict} method the target label is predicted resulting in a pr
 
 \subsubsection{Results}
 
-We didn't experiment very much with the parameters of the neural network at this point: we saw that decreasing the value of $\alpha$ or increasing the number of hidden layers worsened the results, so we just kept our first score, that is 0.753 in training and 0.742 in testing.
+For this model, we started with the architecture proposed in [\ref{Khandelwal}] and a hyperparameter $\alpha=6$, we saw that decreasing the value of $\alpha$ (also increasing the number of hidden layers) worsened the results, while using $\alpha=7$ and 5 hidden layers instead of 3 gives slightly better results.
+
+Our first scores were 0.753 in training and 0.742 in testing, in the latter experiment we obtained 0.757 and 0.747, respectively.
 
 The details of those results are shown in table [\ref{tab:rf-res-1}].
 
-\begin{table}[h!]
+\begin{table}[h!]   %TODO aggiornare tabella
     \centering
     \begin{tabular}{lllll}
         \rowcolor[HTML]{EEEEEE} 
@@ -573,18 +575,97 @@ So we achieved to improve the previous results quite significantly in test numbe
 
 
 \newpage
-\subsection{Linear SVM without fake reviews} \label{sec:svm-no-fake}
+\subsection{Removing fake reviews} \label{sec:no-fake}
 
+In this step we tried to make predictions using only trustworthy features, to see if fake reviews could bias the models, deviating their predictions.
 
+To achieve this, we just applied the previously obtained best models to a different dataset; this is the only difference \wrt the code used in [\ref{sec:svm-no-dim-red}], [\ref{sec:rf-no-dim-red}] and [\ref{sec:nn-no-dim-red}]:
+\begin{lstlisting}[caption={Removing fake reviews},label={lst:remove-fake-rev}]
+    train_set = train_set[train_set['bin_truth_score']!=-1]
+\end{lstlisting}
 
+The score obtained with SVM is 0.723:
 
-\newpage
-\subsection{Random Forest without fake reviews} \label{sec:rf-no-fake}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lllll}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.65               & 0.35            & 0.45              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.74               & 0.91            & 0.81              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.70               & 0.63            & 0.63              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.72               & 0.73            & 0.70              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}72.289\%}                         
+    \end{tabular}
+    \caption{Report for SVM model without fake reviews}
+    \label{tab:svm-res-no-fake}
+\end{table}
 
+The score obtained with Random Forest is 0.741:
 
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lllll}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.68               & 0.41            & 0.51              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.76               & 0.90            & 0.82              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.72               & 0.66            & 0.67              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.73               & 0.74            & 0.72              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.149\%}                         
+    \end{tabular}
+    \caption{Report for Random Forest model without fake reviews}
+    \label{tab:rf-res-no-fake}
+\end{table}
 
+The score obtained with Neural Network is 0.74:
 
-\newpage
-\subsection{Feedforward NN without fake reviews} \label{sec:nn-no-fake}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lllll}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.74               & 0.33            & 0.46              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.74               & 0.94            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.74               & 0.64            & 0.64              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.74               & 0.74            & 0.71              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}73.991\%}                         
+    \end{tabular}
+    \caption{Report for Neural Network model without fake reviews}
+    \label{tab:nn-res-no-fake}
+\end{table}
 
+Contrary to our expectations, the results have worsened rather than improved.\\
+Our hypotheses for explaining this behavior are the following:
+\begin{enumerate}
+    \item Also the fake reviews are useful to define a model of the user or a type of review, for example, if a user tends to give fake reviews, in this case the ML algorithms have less examples to understand and predict his/her votes;
+    \item Despite the model we used to detect fake reviews had very high accuracy on its test set (almost 99\%, as shown in section \nameref{sec:fake-rev}), it was trained on a specific dataset, where each review was labeled with  \texttt{true/false}, that could be too much different from our dataset to produce a significant model for our task.
+\end{enumerate}
 
