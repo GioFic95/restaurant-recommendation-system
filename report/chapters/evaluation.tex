@@ -4,7 +4,7 @@
 
 Let's describe each test we made for each model.
 
-\subsection{Linear Support Vector Machine}
+\subsection{Linear Support Vector Machine}\label{sec:svm}
 
 \subsubsection{Implementation}
 
@@ -101,7 +101,7 @@ However, the improvement can't be completely ascribed to our richer preprocessin
 
 
 \newpage
-\subsection{Random Forest}
+\subsection{Random Forest}\label{sec:rf}
 
 \subsubsection{Implementation}
 
@@ -204,8 +204,9 @@ The details of those results are shown in table [\ref{tab:rf-res-1}].
 
 From $73.727\%$ to $74.168\%$ the improvement is modest, but not negligible.
 
+
 \newpage
-\subsection{Feedforward Neural Network}
+\subsection{Feedforward Neural Network}\label{sec:nn}
 
 \subsubsection{Implementation}
 
@@ -333,3 +334,257 @@ The details of those results are shown in table [\ref{tab:rf-res-1}].
 \end{table}
 
 Again we obtained a slight improvement from $74.168\%$ to $74.204\%$.
+
+
+\newpage
+\subsection{Linear SVM without dimensionality reduction} \label{sec:svm-no-dim-red}
+
+At this point, we decided to train our best SVM model on the whole train set, without dimensionality reduction, i.e., without filtering \texttt{city} and \texttt{categories} features and applying \texttt{OrdinalEncoder} only to the \texttt{postal\_code} feature, that has too many possible values to apply one hot encoding (the resulting dataset size was about 11GB).
+
+So we just loaded the previously obtained model and trained it with the new dataset:
+
+\begin{lstlisting}[caption={SVM without dimensionality reduction},label={lst:svm-no-dim-red}]
+    best_model = jl.load("../models/best_SVM.joblib")
+    best_model.set_params(verbose=10)
+    best_model.get_params()
+    
+    """ Out:
+        {'C':                  0.001,
+        'class_weight':        None,
+        'dual':                True,
+        'fit_intercept':       True,
+        'intercept_scaling':   1,
+        'loss':                'squared_hinge',
+        'max_iter':            50000,
+        'multi_class':         'ovr',
+        'penalty':             'l2',
+        'random_state':        0,
+        'tol':                 0.0001,
+        'verbose':             10}
+    """
+    
+    best_model.fit(train_set.drop(columns=['likes', 'stars_review', 'review_id',
+                                           'user_id', 'business_id']), 
+                   train_set['likes'])
+\end{lstlisting}
+
+The final test score was 0.737, as shown in table [\ref{tab:svm-res-no-dim-red}].
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lllll}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.72               & 0.34            & 0.46              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.74               & 0.93            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.73               & 0.64            & 0.64              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.73               & 0.74            & 0.71              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}73.74\%}                         
+    \end{tabular}
+    \caption{Report for SVM model without dimensionality reduction}
+    \label{tab:svm-res-no-dim-red}
+\end{table}
+
+The results we got weren't much better than those obtained with the SVM in [\ref{sec:svm}], probably because it would be necessary to pass through a new grid search phase to take full advantage the richer dataset, but we couldn't do it since it would have taken too long, because we didn't have enough RAM to exploit parallelism in \texttt{GridSearchCV}.
+
+
+\newpage
+\subsection{Random Forest without dimensionality reduction} \label{sec:rf-no-dim-red}
+
+We followed a similar criterion for the Random Forest model, so we loaded the previously obtained model and instantiated a new one with the same parameters, customizing the two not set by \texttt{GridSearchCV}, i.e., \texttt{n\_jobs} and \texttt{verbose}.
+
+\begin{lstlisting}[caption={Random Forest without dimensionality reduction},label={lst:rf-no-dim-red}]
+    params = jl.load("../models/best_Random_Forest_2.joblib").get_params()
+    params['n_jobs'] = -1
+    params['verbose'] = 10
+    best_model = RandomForestClassifier(**params)
+    best_model.get_params()
+    
+    """ Out:
+        {'bootstrap':                 False,
+        'class_weight':               None,
+        'criterion':                  'entropy',
+        'max_depth':                  50,
+        'max_features':               'auto',
+        'max_leaf_nodes':             None,
+        'min_impurity_decrease':      0.0,
+        'min_impurity_split':         None,
+        'min_samples_leaf':           2,
+        'min_samples_split':          10,
+        'min_weight_fraction_leaf':   0.0,
+        'n_estimators':               1000,
+        'n_jobs':                     -1,
+        'oob_score':                  False,
+        'random_state':               None,
+        'verbose':                    10,
+        'warm_start':                 False}
+    """
+    
+    best_model.fit(train_set.drop(columns=['likes', 'stars_review', 'review_id',
+                                           'user_id', 'business_id']), 
+                   train_set['likes'])
+\end{lstlisting}
+
+In this case the result is even worse than the one obtained in [\ref{sec:rf}], since we got a test score of 0.739, versus the previous score of 0.741.\\
+More details in table [\ref{tab:rf-res-no-dim-red}].
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lllll}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.69               & 0.38            & 0.49              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.75               & 0.92            & 0.82              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.72               & 0.65            & 0.66              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.73               & 0.74            & 0.71              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}73.74\%}                         
+    \end{tabular}
+    \caption{Report for Random Forest model without dimensionality reduction}
+    \label{tab:rf-res-no-dim-red}
+\end{table}
+
+The reason of the worsening in the accuracy could be the same as for the previous experiment [\ref{sec:svm-no-dim-red}], i.e., the absence of the grid search phase (skipped for the same reasons formerly illustrated), that in this case is even more relevant, since there are many hyperparameters to tune.
+
+
+\newpage
+\subsection{Feedforward NN without dimensionality reduction} \label{sec:nn-no-dim-red}
+
+For the Neural Network, we used a different approach: since there isn't any grid search to do in this case, we manually tested some different configurations and trained completely new models.\\
+These models are similar to the one used in [\ref{sec:nn}] except for the dataset used, the number of hidden layers, the number of nodes in each hidden layer (that depends on $\alpha$ in the formula defined in [\ref{sec:nn}], that we present again here), and the batch size.
+
+Number of nodes per hidden layer:
+\begin{equation*}
+N_h = \frac{N_s}{\alpha * (N_i + N_o)}
+\end{equation*}
+
+In table [\ref{tab:nn-test-no-dim-red}] we summarize all the configurations of the tests we made (see the notebook for more details and code).
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{
+            >{\columncolor[HTML]{EEEEEE}}l |
+            >{\columncolor[HTML]{EEEEEE}}l 
+            >{\columncolor[HTML]{EEEEEE}}l 
+            >{\columncolor[HTML]{EEEEEE}}l 
+            >{\columncolor[HTML]{EEEEEE}}l 
+            >{\columncolor[HTML]{EEEEEE}}l }
+        \textbf{\#} & \textbf{num. hidden layers} & \textbf{alpha} & \textbf{batch size} & \textbf{train accuracy} & \textbf{test accuracy} \\ \hline
+        1           & 3                           & 6              & 100                 & 0.756                   & 0.743                  \\
+        2           & 3                           & 2              & 100                 & 0.755                   & 0.738                  \\
+        3           & 3                           & 7              & 100                 & 0.753                   & 0.742                  \\
+        4           & 5                           & 7              & 100                 & 0.757                   & 0.746                  \\
+        5           & 5                           & 7              & 500                 & 0.754                   & 0.74                   \\
+        6           & 5                           & 6              & 100                 & 0.76                    & 0.745                  \\
+        7           & 5                           & 6              & 500                 & 0.758                   & 0.742                 
+    \end{tabular}
+    \caption{Report for Random Forest model without dimensionality reduction}
+    \label{tab:nn-test-no-dim-red}
+\end{table}
+
+So we achieved to improve the previous results quite significantly in test number 4, for which we present the code in listing [\ref{lst:nn-no-dim-red}] and some details in table [\ref{tab:nn-res-no-dim-red}].
+
+\begin{lstlisting}[caption={Neural Network without dimensionality reduction},label={lst:nn-no-dim-red}]
+    classifier = Sequential()
+    
+    classifier.add(Dense(number_hidden_neurons, 
+                         activation = 'relu', 
+                         kernel_initializer = 'random_normal', 
+                         input_dim = number_features))
+    
+    #Second Hidden Layer
+    classifier.add(Dense(number_hidden_neurons, 
+                         activation = 'relu', 
+                         kernel_initializer = 'random_normal'))
+    
+    #Third Hidden Layer
+    classifier.add(Dense(number_hidden_neurons, 
+                         activation = 'relu', 
+                         kernel_initializer = 'random_normal'))
+
+    #Fourth Hidden Layer
+    classifier.add(Dense(number_hidden_neurons, 
+                         activation = 'relu', 
+                         kernel_initializer = 'random_normal'))
+    
+    #Fifth Hidden Layer
+    classifier.add(Dense(number_hidden_neurons, 
+                         activation = 'relu', 
+                         kernel_initializer = 'random_normal'))
+    
+    #Output Layer
+    classifier.add(Dense(1, 
+                         activation = 'sigmoid', 
+                         kernel_initializer = 'random_normal'))
+    
+    
+    # Compiling the neural network
+    classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy',
+                       metrics = ['accuracy'])
+    
+    # Fitting the data to the training dataset
+    classifier.fit(train_set.drop(columns = ['likes', 'stars_review',
+                                             'review_id', 'user_id', 
+                                             'business_id']),
+                   train_set['likes'], validation_split = 0.3, batch_size = 100,
+                   epochs = 100)
+\end{lstlisting}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lllll}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.69               & 0.43            & 0.53              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.76               & 0.90            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.72               & 0.67            & 0.68              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.74               & 0.75            & 0.73              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.625\%}                         
+    \end{tabular}
+    \caption{Report for Neural Network model without dimensionality reduction}
+    \label{tab:nn-res-no-dim-red}
+\end{table}
+
+
+\newpage
+\subsection{Linear SVM without fake reviews} \label{sec:svm-no-fake}
+
+
+
+
+\newpage
+\subsection{Random Forest without fake reviews} \label{sec:rf-no-fake}
+
+
+
+
+\newpage
+\subsection{Feedforward NN without fake reviews} \label{sec:nn-no-fake}
+
+
