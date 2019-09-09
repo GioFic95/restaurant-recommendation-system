@@ -100,6 +100,7 @@ Even if the results aren't extraordinary good, it has to be noticed that we regi
 However, the improvement can't be completely ascribed to our richer preprocessing, since our dataset was bigger than the one used by Gandhe, because his paper was referred to the 2014 edition of the Yelp Dataset Challenge, while our work is based on the 2019 edition.
 
 
+\newpage
 \subsection{Random Forest}
 
 \subsubsection{Implementation}
@@ -161,6 +162,7 @@ best_model.fit(train_set.drop(columns=['likes',
                                        'business_id']),
                train_set['likes'])
 
+
 #Random Forest prediction 
 predic = best_model.predict(test_set.drop(columns=['likes', 'stars_review',
                                                    'review_id', 'user_id', 
@@ -202,7 +204,7 @@ The details of those results are shown in table [\ref{tab:rf-res-1}].
 
 From $73.727\%$ to $74.168\%$ the improvement is modest, but not negligible.
 
-
+\newpage
 \subsection{Feedforward Neural Network}
 
 \subsubsection{Implementation}
@@ -305,8 +307,6 @@ With the \texttt{predict} method the target label is predicted resulting in a pr
 We didn't experiment very much with the parameters of the neural network at this point: we saw that decreasing the value of $\alpha$ or increasing the number of hidden layers worsened the results, so we just kept our first score, that is 0.753 in training and 0.742 in testing.
 
 The details of those results are shown in table [\ref{tab:rf-res-1}].
-
-\newpage % TODO check if can be removed
 
 \begin{table}[h!]
     \centering
