@@ -72,9 +72,9 @@ but we never achieved to reach convergence, neither with the last 30 hours long 
 
 Our best results are shown in table [\ref{tab:svm-res-1}].
 
-\begin{table}[h]
+\begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
@@ -178,9 +178,9 @@ After more than three days of execution, the best train score we obtained was 0.
 
 The details of those results are shown in table [\ref{tab:rf-res-1}].
 
-\begin{table}[h]
+\begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
@@ -305,37 +305,38 @@ With the \texttt{predict} method the target label is predicted resulting in a pr
 
 \subsubsection{Results}
 
-For this model, we started with the architecture proposed in [\ref{Khandelwal}] and a hyperparameter $\alpha=6$, we saw that decreasing the value of $\alpha$ (also increasing the number of hidden layers) worsened the results, while using $\alpha=7$ and 5 hidden layers instead of 3 gives slightly better results.
+For this model, we started with the architecture proposed in [\ref{Khandelwal}] and a hyperparameter $\alpha=6$.\\
+We saw that decreasing the value of $\alpha$ (also increasing the number of hidden layers) worsened the results, while using $\alpha=7$ and 5 hidden layers instead of 3 gives slightly better results. No improvements with greater values of $\alpha$.
 
-Our first scores were 0.753 in training and 0.742 in testing, in the latter experiment we obtained 0.757 and 0.747, respectively.
+Our first scores were 0.753 in training and 0.742 in testing, while in the latter experiment we obtained 0.757 and 0.747, respectively.
 
-The details of those results are shown in table [\ref{tab:rf-res-1}].
+The details of our best results are shown in table [\ref{tab:nn-res-1}].
 
-\begin{table}[h!]   %TODO aggiornare tabella
+\begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{0}               & 0.69               & 0.40            & 0.51              & 50930            \\
+        \textbf{0}               & 0.69               & 0.43            & 0.53              & 50930            \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{1}               & 0.75               & 0.91            & 0.83              & 103063           \\
+        \textbf{1}               & 0.76               & 0.90            & 0.83              & 103063           \\
         \rowcolor[HTML]{FBFBFB} 
         &                    &                 &                   &                  \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{macro avg}       & 0.72               & 0.66            & 0.67              & 153993           \\
+        \textbf{macro avg}       & 0.72               & 0.67            & 0.68              & 153993           \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{weighted avg}    & 0.73               & 0.74            & 0.72              & 153993           \\
+        \textbf{weighted avg}    & 0.74               & 0.75            & 0.73              & 153993           \\
         \rowcolor[HTML]{FBFBFB} 
         &                    &                 &                   &                  \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.204\%}                         
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.679\%}                         
     \end{tabular}
     \caption{Report for Neural Network model with dimensionality reduction}
     \label{tab:nn-res-1}
 \end{table}
 
-Again we obtained a slight improvement from $74.168\%$ to $74.204\%$.
+Again we obtained a slight improvement from $74.168\%$ to $74.679\%$.
 
 
 \newpage
@@ -374,7 +375,7 @@ The final test score was 0.737, as shown in table [\ref{tab:svm-res-no-dim-red}]
 
 \begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
@@ -441,7 +442,7 @@ More details in table [\ref{tab:rf-res-no-dim-red}].
 
 \begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
@@ -477,17 +478,17 @@ Number of nodes per hidden layer:
 N_h = \frac{N_s}{\alpha * (N_i + N_o)}
 \end{equation*}
 
-In table [\ref{tab:nn-test-no-dim-red}] we summarize all the configurations of the tests we made (see the notebook for more details and code).
+In table [\ref{tab:nn-test-no-dim-red}] we summarize all the configurations of the tests we made (see the notebook for more details and full code).
 
 \begin{table}[h!]
     \centering
     \begin{tabular}{
-            >{\columncolor[HTML]{EEEEEE}}l |
-            >{\columncolor[HTML]{EEEEEE}}l 
-            >{\columncolor[HTML]{EEEEEE}}l 
-            >{\columncolor[HTML]{EEEEEE}}l 
-            >{\columncolor[HTML]{EEEEEE}}l 
-            >{\columncolor[HTML]{EEEEEE}}l }
+            >{\columncolor[HTML]{EEEEEE}}c |
+            >{\columncolor[HTML]{EEEEEE}}c 
+            >{\columncolor[HTML]{EEEEEE}}c 
+            >{\columncolor[HTML]{EEEEEE}}c 
+            >{\columncolor[HTML]{EEEEEE}}c 
+            >{\columncolor[HTML]{EEEEEE}}c }
         \textbf{\#} & \textbf{num. hidden layers} & \textbf{alpha} & \textbf{batch size} & \textbf{train accuracy} & \textbf{test accuracy} \\ \hline
         1           & 3                           & 6              & 100                 & 0.756                   & 0.743                  \\
         2           & 3                           & 2              & 100                 & 0.755                   & 0.738                  \\
@@ -495,13 +496,14 @@ In table [\ref{tab:nn-test-no-dim-red}] we summarize all the configurations of t
         4           & 5                           & 7              & 100                 & 0.757                   & 0.746                  \\
         5           & 5                           & 7              & 500                 & 0.754                   & 0.74                   \\
         6           & 5                           & 6              & 100                 & 0.76                    & 0.745                  \\
-        7           & 5                           & 6              & 500                 & 0.758                   & 0.742                 
+        7           & 5                           & 6              & 500                 & 0.758                   & 0.742                  \\
+        8           & 5                           & 8              & 100                 & 0.758                   & 0.742                  \\
     \end{tabular}
     \caption{Report for Random Forest model without dimensionality reduction}
     \label{tab:nn-test-no-dim-red}
 \end{table}
 
-So we achieved to improve the previous results quite significantly in test number 4, for which we present the code in listing [\ref{lst:nn-no-dim-red}] and some details in table [\ref{tab:nn-res-no-dim-red}].
+Fir the best test, the number 4, We present the code in listing [\ref{lst:nn-no-dim-red}] and some details in table [\ref{tab:nn-res-no-dim-red}].
 
 \begin{lstlisting}[caption={Neural Network without dimensionality reduction},label={lst:nn-no-dim-red}]
     classifier = Sequential()
@@ -551,7 +553,7 @@ So we achieved to improve the previous results quite significantly in test numbe
 
 \begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
@@ -573,6 +575,9 @@ So we achieved to improve the previous results quite significantly in test numbe
     \label{tab:nn-res-no-dim-red}
 \end{table}
 
+As can be easily seen comparing this result with the previous best one (74.679\% in [\ref{sec:nn}]), we weren't able to improve the accuracy even in this case.\\
+Thus, it appears that our dimensionality reduction procedure was pretty reasonable, after all, and that grid search wasn't involved in the worsening of our scores, except marginally.
+
 
 \newpage
 \subsection{Removing fake reviews} \label{sec:no-fake}
@@ -588,7 +593,7 @@ The score obtained with SVM is 0.723:
 
 \begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
@@ -614,7 +619,7 @@ The score obtained with Random Forest is 0.741:
 
 \begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
@@ -640,7 +645,7 @@ The score obtained with Neural Network is 0.74:
 
 \begin{table}[h!]
     \centering
-    \begin{tabular}{lllll}
+    \begin{tabular}{lcccc}
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 

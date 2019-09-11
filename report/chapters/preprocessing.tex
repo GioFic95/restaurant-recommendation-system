@@ -31,9 +31,9 @@ With our data clean and tidy, we used some models described by Zhang in [\ref{Zh
 We trained all of their models: a Convolutional Neural Network, fed with sequences obtained by a tokenizer from the \href{https://keras.io/preprocessing/text/}{Keras preprocessing} library, and a Support Vector Machine, fitted on vectors computer by Scikit Learn's \href{https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html}{TfidfVectorizer}.\\
 It turned out that the performances of the Convolutional Neural Network were worse \wrt the Support Vector Machine, as we can see in the tables [\ref{tab:cnn-fake-rev}] and [\ref{tab:svm-fake-rev}].
 
-\begin{table}[h]
+\begin{table}[h!]
 	\centering
-	\begin{tabular}{lllll}
+	\begin{tabular}{lcccc}
 		\rowcolor[HTML]{EEEEEE} 
 		\cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
 		\rowcolor[HTML]{EEEEEE} 
@@ -57,9 +57,9 @@ It turned out that the performances of the Convolutional Neural Network were wor
 	\label{tab:cnn-fake-rev}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[h!]
 	\centering
-	\begin{tabular}{lllll}
+	\begin{tabular}{lcccc}
 		\rowcolor[HTML]{EEEEEE} 
 		\cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
 		\rowcolor[HTML]{EEEEEE} 
@@ -164,7 +164,7 @@ where
 
 We have three versions for this feature too, with the same meaning described in the previous section.
 
-\subsection{Dimensionality reduction and further preprocessing}
+\subsection{Dimensionality reduction and further preprocessing}\label{sec:dim-red}
 
 At this point we had all the features we needed, so, that was the moment of preparing the data so that they were ready to be fed to the models. The next steps we performed were the following:
 \begin{enumerate}
