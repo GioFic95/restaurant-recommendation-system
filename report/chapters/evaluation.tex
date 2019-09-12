@@ -12,7 +12,7 @@ To implement the linear SVM method we used Scikit Learn's \href{https://scikit-l
 
 The main decision to make on the linear SVM is how to configure the parameters of the model, so we decided to perform a grid search (always using a \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html}{Scikit Learn module}) to find the best configuration of the main parameter, $C$.
 
-We created an instance of the Linear SVM model to be used in grid search, then performed a grid search training phase to get the best estimator, i.e. the linear SVM instance with the parameter $C$ set to the best value among those proposed among the grid parameters.
+We created an instance of the Linear SVM model to be used in grid search, then performed a grid search training phase to get the best estimator, i.e. the linear SVM instance with the parameter $C$ set to the best value among those proposed in the grid.
 
 For the grid search, only a portion of the training set was used, in order to improve the parallelizability of the procedure, since each parallel instance require its own copy of the dataset:\\
 \colorbox{backgray}{\lstinline|sub\_train\_set = train\_set[:round(train\_set.shape[0]/x)]|}
@@ -285,7 +285,7 @@ classifier.fit(train_set.drop(columns = ['likes', 'stars_review',
                epochs = 100)
 \end{lstlisting}
 
-In training, the model performs 100 iterations with one size for each large batch 100. A part of the training test will be used as a validation test, in order to have a 70 - 30 ratio.
+During training, the model performs 100 iterations with a bacth size of 100 for each iteration. A part of the training test will be used as a validation test, in order to have a 70 - 30 ratio.
 
 In the prediction part, therefore we use Keras once again, with the following code:
 
