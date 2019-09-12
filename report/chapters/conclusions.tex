@@ -2,7 +2,7 @@
 
 \section{Conclusions}
 
-To sum up:
+To sum up what we have done:
 \begin{enumerate}
     \item We downloaded the datasets of the Yelp Dataset Challenge [\ref{yelp-kaggle}], that comprise information about restaurants, users and reviews in many different cities, to predict if a certain user will like a certain restaurant;
     \item We used the steps in [\ref{Hou}] to perform a first data cleaning (see sec. [\ref{sec:data-clean}]);
@@ -15,4 +15,50 @@ To sum up:
     \item We trained and tested the three models with different versions of our dataset (see sec. [\ref{sec:experiments}]).
 \end{enumerate}
 
-...\textit{to be continued}...
+All the experiments we executed and results we obtained are summarized in table [\ref{tab:res-summary}]:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{c|lr}
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{\#} & \multicolumn{1}{c}{\cellcolor[HTML]{EEEEEE}\textbf{description}} & \textbf{accuracy} \\ \hline
+        \rowcolor[HTML]{EEEEEE} 
+        1           & SVM with dimensionality reduction                                & 73.727\%          \\
+        \rowcolor[HTML]{EEEEEE} 
+        2           & RF with dimensionality reduction                                 & 74.168\%          \\
+        \rowcolor[HTML]{E1E1E1} 
+        3           & NN with dimensionality reduction                                 & 74.679\%          \\ \hline
+        \rowcolor[HTML]{EEEEEE} 
+        4           & SVM without dimensionality reduction                             & 73.74\%           \\
+        \rowcolor[HTML]{EEEEEE} 
+        5           & RF without dimensionality reduction                              & 73.889\%          \\
+        \rowcolor[HTML]{EEEEEE} 
+        6           & NN without dimensionality reduction                              & 74.625\%          \\ \hline
+        \rowcolor[HTML]{EEEEEE} 
+        7           & SVM without fake reviews                                         & 72.289\%          \\
+        \rowcolor[HTML]{EEEEEE} 
+        8           & RF without fake reviews                                          & 74.149\%          \\
+        \rowcolor[HTML]{EEEEEE} 
+        9           & NN without fake reviews                                          & 74.067\%          \\ \hline
+        \rowcolor[HTML]{EEEEEE} 
+        10          & SVM with only standard features                                  & 73.795\%          \\
+        \rowcolor[HTML]{EEEEEE} 
+        11          & RF with only standard features                                   & 74.303\%          \\
+        \rowcolor[HTML]{EEEEEE} 
+        12          & NN with only standard features                                   & 74.137\%          \\ \hline
+        \rowcolor[HTML]{EEEEEE} 
+        13          & SVM with only real features                                      & 70.013\%          \\
+        \rowcolor[HTML]{EEEEEE} 
+        14          & RF with only real features                                       & 74.34\%           \\
+        \rowcolor[HTML]{EEEEEE} 
+        15          & NN with only real features                                       & 74.44\%          
+    \end{tabular}
+    \caption{Result summary}
+    \label{tab:res-summary}
+\end{table}
+
+Finally, it turned out that our initial guess, that the best performances could result out from a combination of all the computed features, weighed and not, was actually right.
+
+We were unable to obtain a surprisingly great accuracy, but we gained a considerable improvement \wrt the score achieved by Gandhe in [\ref{Gandhe}].
+
+Therefore, we can conclude that, even if the task is quite complex, since the tastes of a person depend on lots of reasons, details and experiences, it isn't completely impossible to give recommendations to users based on their previous reviews and what other users said, especially if we analyze the trustworthiness of a review and use this aspect to give it more or less weight.

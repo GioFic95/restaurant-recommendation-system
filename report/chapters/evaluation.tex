@@ -458,7 +458,7 @@ More details in table [\ref{tab:rf-res-no-dim-red}].
         \rowcolor[HTML]{FBFBFB} 
         &                    &                 &                   &                  \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}73.74\%}                         
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}73.889\%}                         
     \end{tabular}
     \caption{Report for Random Forest model without dimensionality reduction}
     \label{tab:rf-res-no-dim-red}
@@ -649,19 +649,19 @@ The score obtained with Neural Network is 0.74:
         \rowcolor[HTML]{EEEEEE} 
         \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{0}               & 0.74               & 0.33            & 0.46              & 50930            \\
+        \textbf{0}               & 0.69               & 0.39            & 0.50              & 50930            \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{1}               & 0.74               & 0.94            & 0.83              & 103063           \\
+        \textbf{1}               & 0.75               & 0.92            & 0.83              & 103063           \\
         \rowcolor[HTML]{FBFBFB} 
         &                    &                 &                   &                  \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{macro avg}       & 0.74               & 0.64            & 0.64              & 153993           \\
+        \textbf{macro avg}       & 0.72               & 0.65            & 0.66              & 153993           \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{weighted avg}    & 0.74               & 0.74            & 0.71              & 153993           \\
+        \textbf{weighted avg}    & 0.73               & 0.74            & 0.72              & 153993           \\
         \rowcolor[HTML]{FBFBFB} 
         &                    &                 &                   &                  \\
         \rowcolor[HTML]{EEEEEE} 
-        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}73.991\%}                         
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.067\%}                         
     \end{tabular}
     \caption{Report for Neural Network model without fake reviews}
     \label{tab:nn-res-no-fake}
@@ -674,3 +674,230 @@ Our hypotheses for explaining this behavior are the following:
     \item Despite the model we used to detect fake reviews had very high accuracy on its test set (almost 99\%, as shown in section \nameref{sec:fake-rev}), it was trained on a specific dataset, where each review was labeled with  \texttt{true/false}, that could be too much different from our dataset to produce a significant model for our task.
 \end{enumerate}
 
+
+\newpage
+\subsection{Only ``standard'' features} \label{sec:only-std}
+
+In this step we tried to make predictions using only the ``standard'' features, i.e., only the historical features as described in [\ref{Gandhe}], where each review has the same weight, without considering our \textit{truth score} (more details about those features are in sec. [\ref{sec:hist-feat}]), and the same holds for the feature based on collaborative filtering described in sec. [\ref{sec:coll-appr}].
+
+The aim is to see if it is actually useful to add the variants of the features we introduced, in which the vote given by a user to a restaurant in a review is weighted with the \textit{truth score}.
+
+As in the previous step, we just applied the formerly obtained best models to a different dataset; this is the only difference \wrt the code used in [\ref{sec:svm-no-dim-red}], [\ref{sec:rf-no-dim-red}] and [\ref{sec:nn-no-dim-red}]:
+\begin{lstlisting}[caption={Removing non standard features},label={lst:only-std}]
+# columns we are going to remove from the dataset
+
+cols_bin = ['cuisine_av_hist_bin', 'bin_truth_score', 'coll_score_bin',
+            'average_stars_bin_review', 'num_reviews_bin_review',
+            'average_stars_bin_user', 'num_reviews_bin_user', 
+            'av_rat_chinese_cuisine_bin', 'av_rat_japanese_cuisine_bin',
+            'av_rat_mexican_cuisine_bin', 'av_rat_italian_cuisine_bin',
+            'av_rat_others_cuisine_bin', 'av_rat_american_cuisine_bin',
+            'av_rat_korean_cuisine_bin', 'av_rat_mediterranean_cuisine_bin',
+            'av_rat_thai_cuisine_bin', 'av_rat_asianfusion_cuisine_bin']
+
+cols_real = ['cuisine_av_hist_real', 'real_truth_score', 'coll_score_real',
+             'average_stars_real_review', 
+             'num_reviews_real_review', 'average_stars_real_user',
+             'num_reviews_real_user', 'av_rat_chinese_cuisine_real',
+             'av_rat_japanese_cuisine_real', 'av_rat_mexican_cuisine_real',
+             'av_rat_italian_cuisine_real', 'av_rat_others_cuisine_real',
+             'av_rat_american_cuisine_real', 'av_rat_korean_cuisine_real',
+             'av_rat_mediterranean_cuisine_real', 'av_rat_thai_cuisine_real', 
+             'av_rat_asianfusion_cuisine_real']
+
+train_set = train_set.drop(columns=[*_cols_bin, *_cols_real])
+\end{lstlisting}
+
+The score obtained with SVM is 0.738:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lcccc}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.70               & 0.36            & 0.48              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.75               & 0.92            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.72               & 0.64            & 0.65              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.73               & 0.74            & 0.71              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}73.795\%}                         
+    \end{tabular}
+    \caption{Report for SVM model with only standard features}
+    \label{tab:svm-res-std}
+\end{table}
+
+The score obtained with Random Forest is 0.743:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lcccc}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.69               & 0.40            & 0.51              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.75               & 0.91            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.72               & 0.66            & 0.67              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.73               & 0.74            & 0.72              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.303\%}                         
+    \end{tabular}
+    \caption{Report for Random Forest model with only standard features}
+    \label{tab:rf-res-std}
+\end{table}
+
+The score obtained with Neural Network is 0.741:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lcccc}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.72               & 0.36            & 0.48              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.75               & 0.93            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.73               & 0.64            & 0.65              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.74               & 0.74            & 0.71              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.137\%}                         
+    \end{tabular}
+    \caption{Report for Neural Network model with only standard features}
+    \label{tab:nn-res-std}
+\end{table}
+
+Even if there is a slight improvement in the results of the SVM and the Random forest, the Neural Network, that is our best model, gets worse, so overall we can say that the first version was better, since it allowed us to reach a higher score.
+
+
+\newpage
+\subsection{Only ``real'' features} \label{sec:only-real}
+
+In this step we tried to make predictions using only the ``real'' features, i.e., only the \textit{real} version of the historical features (see sec. [\ref{sec:hist-feat}]) and of the feature based on collaborative filtering (see sec. [\ref{sec:coll-appr}]), i.e., the version of the features in which each review vote is weighted with the corresponding \texttt{real\_truth\_score}.
+
+The aim is to see if it is really useful to use all the three versions of the features together, or if it is sufficient to keep just the real version, where we don't delete any review, but we give less importance to those that are considered fake.
+
+As in the previous step, we just applied the formerly obtained best models to a different dataset; this is the only difference \wrt the code used in [\ref{sec:svm-no-dim-red}], [\ref{sec:rf-no-dim-red}] and [\ref{sec:nn-no-dim-red}]:
+\begin{lstlisting}[caption={Removing non real features},label={lst:only-real}]
+# columns we are going to remove from the dataset
+
+cols_std = ['cuisine_av_hist', 'coll_score', 'average_stars_review',
+            'num_reviews_review', 'average_stars_user',
+            'num_reviews_user', 'av_rat_chinese_cuisine',
+            'av_rat_japanese_cuisine', 'av_rat_mexican_cuisine',
+            'av_rat_italian_cuisine', 'av_rat_others_cuisine',
+            'av_rat_american_cuisine', 'av_rat_korean_cuisine',
+            'av_rat_mediterranean_cuisine',  'av_rat_thai_cuisine',
+            'av_rat_asianfusion_cuisine']
+
+cols_bin = ['cuisine_av_hist_bin', 'bin_truth_score', 'coll_score_bin',
+             'average_stars_bin_review', 'num_reviews_bin_review',
+             'average_stars_bin_user', 'num_reviews_bin_user', 
+             'av_rat_chinese_cuisine_bin', 'av_rat_japanese_cuisine_bin',
+             'av_rat_mexican_cuisine_bin', 'av_rat_italian_cuisine_bin',
+             'av_rat_others_cuisine_bin', 'av_rat_american_cuisine_bin',
+             'av_rat_korean_cuisine_bin', 'av_rat_mediterranean_cuisine_bin',
+             'av_rat_thai_cuisine_bin', 'av_rat_asianfusion_cuisine_bin']
+             
+train_set = train_set.drop(columns=[*_cols_bin, *_cols_std])
+\end{lstlisting}
+
+The score obtained with SVM is 0.7:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lcccc}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.55               & 0.49            & 0.52              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.76               & 0.81            & 0.78              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.66               & 0.65            & 0.65              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.69               & 0.70            & 0.69              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}70.013\%}                         
+    \end{tabular}
+    \caption{Report for SVM model with only real features}
+    \label{tab:svm-res-real}
+\end{table}
+
+The score obtained with Random Forest is 0.743:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lcccc}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.70               & 0.39            & 0.50              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.75               & 0.92            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.73               & 0.65            & 0.67              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.73               & 0.74            & 0.72              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.34\%}                         
+    \end{tabular}
+    \caption{Report for Random Forest model with only real features}
+    \label{tab:rf-res-real}
+\end{table}
+
+\newpage
+The score obtained with Neural Network is 0.744:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{lcccc}
+        \rowcolor[HTML]{EEEEEE} 
+        \cellcolor[HTML]{FBFBFB} & \textbf{precision} & \textbf{recall} & \textbf{f1-score} & \textbf{support} \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{0}               & 0.70               & 0.39            & 0.51              & 50930            \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{1}               & 0.75               & 0.92            & 0.83              & 103063           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{macro avg}       & 0.73               & 0.66            & 0.67              & 153993           \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{weighted avg}    & 0.74               & 0.74            & 0.72              & 153993           \\
+        \rowcolor[HTML]{FBFBFB} 
+        &                    &                 &                   &                  \\
+        \rowcolor[HTML]{EEEEEE} 
+        \textbf{accuracy}        & \multicolumn{4}{l}{\cellcolor[HTML]{EEEEEE}74.44\%}                         
+    \end{tabular}
+    \caption{Report for Neural Network model with only real features}
+    \label{tab:nn-res-real}
+\end{table}
+
+Similarly to what we said for the previous experiment, we can observe that one of the models, the Random Forest, gives a slightly higher result, but the others gets worse, expecially the SVM, therefore globally the first results are confirmed as the best.
