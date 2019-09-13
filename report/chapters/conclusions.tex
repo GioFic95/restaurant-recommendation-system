@@ -10,7 +10,7 @@ To sum up what we have done:
     \item We divided the review dataset in three parts: history, training and testing;
     \item We used the first part to compute the \textit{historical features} described in [\ref{Gandhe}], but we added for each new feature two versions based on our truth scores (see sec. [\ref{sec:hist-feat}]);
     \item We added a new feature based on collaborative filtering, i.e. we used the votes given by similar users to predict the vote that a certain user would give to a certain restaurant (see sec. [\ref{sec:coll-appr}]);
-    \item We limited the possible values of the features \texttt{city} and \texttt{categories} to reduce the final size of our dataset, removing the ones that appear less than a fixed threshold (see sec. [\ref{sec:dim-red}]);
+    \item We limited the possible values of the features \texttt{city} and \texttt{categories} to reduce the final size of our dataset, removing the ones that appear less times than a fixed threshold (see sec. [\ref{sec:dim-red}]);
     \item We implemented three models to make our predictions: a Support Vector Machine, a Random Forest and a Neural Network (see sec. [\ref{sec:models}]);
     \item We trained and tested the three models with different versions of our dataset (see sec. [\ref{sec:experiments}]).
 \end{enumerate}

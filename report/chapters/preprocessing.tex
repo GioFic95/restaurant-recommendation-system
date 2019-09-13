@@ -8,7 +8,7 @@ As the first thing we did with our datasets, we just applied the data cleaning b
 
 What we do based on their kernel is:
 \begin{enumerate}
-	\item Transfer json into Pandas dataframe with proper indexing;
+	\item Convert json files into Pandas dataframes with proper indexing;
 	\item Extract data that includes all restaurants;
 	\item Replace garbage data which includes incorrect states and postal codes;
 	\item Date transformations and standardization;
@@ -20,8 +20,8 @@ What we do based on their kernel is:
 
 The main features they work on are \texttt{categories}, \texttt{attributes} and \texttt{hours} in the \textit{business} dataset, renamed \textit{restaurants} since other kind of businesses are not considered.\\
 The feature \texttt{categories} contains a list of kinds of businesses, ranging from shops to sport centers, so only the items that contains \texttt{"restaurant"} in that list are kept; then the most frequent and significant categories are extracted and saved in a new feature called \texttt{cuisine}, that we used to infer the users' preferences and to compute the historical features [\ref{sec:hist-feat}].\\
-The feature \texttt{attributes} contains a dictionary of characteristics of the restaurant, such as if it offers alcohol or if it has wifi connection, but these dictionaries are a bit messy, so the authors create a new feature for each attribute and make the values homogeneous, for example \texttt{wifi} has values such as \texttt{"No", "u`no'", "`no'", `None'} and only \texttt{"No"} is kept.\\
-The feature \texttt{hours} contains a dictionary of the form \texttt{\{"day\_of\_the\_week": "opening\_hour-closing\_hour"\}}, so it's not very usable, thus the authors divide this features in two features per day of the week: one for the opening and one for the closing.
+The feature \texttt{attributes} contains a dictionary of characteristics of the restaurant, such as if it offers alcohol or if it has wifi connection, but these dictionaries are a bit messy, so the authors create a new feature for each attribute and make the values homogeneous, for example \texttt{wifi} has values such as \texttt{"No", "u'no'", "'no'", 'None'} and only \texttt{"No"} is kept.\\
+The feature \texttt{hours} contains a dictionary of the form \texttt{\{"day\_of\_the\_week": "opening\_hour -\\ closing\_hour"\}}, so it's not very usable, thus the authors divide this features in two features per day of the week: one for the opening and one for the closing.
 
 
 \subsection{Fake Review Detection} \label{sec:fake-rev}
@@ -136,7 +136,7 @@ In order to do this, we had to split the review dataset in three parts:
 \end{itemize}
 We have picked $m=3$ and $n=8$, so the test set goes from 9/1/2018 to 11/30/2018, the training set goes from 1/1/2018 to 8/31/2018, the history contains the remaining data, from 10/12/2004 to 12/31/2017.
 
-While the other features were quite straightforward to implement and fast to compute, we had to optimize the code of the feature (3.1.) in order to prevent its computation from taking more days, so we tried two libraries that are supposed to automatically speed up a python program running it on more processors, with a minimal intervention by the programmer. The first, \href{https://modin.readthedocs.io/en/latest/index.html}{Modin}, is specifically meant for Pandas, and the second, \href{https://numba.pydata.org/}{Numba}, more generically for Python math operations, but none of them actually worked, the former because of some incompatibility with Windows OS, and the latter because it ``likes NumPy'' (as written \href{http://numba.pydata.org/numba-doc/latest/user/5minguide.html#will-numba-work-for-my-code}{in the docs}) but not Pandas. So, we decided to manually split the datasets and pass portions of them to a function launched in parallel on multiple processors by a \href{https://docs.python.org/3.6/library/multiprocessing.html#module-multiprocessing.pool}{process pool}, and this reduced the computation time to just few hours.
+While the other features were quite straightforward to implement and fast to compute, we had to optimize the code of the feature (3.1.) in order to prevent its computation from taking more days, so we tried two libraries that are supposed to automatically speed up a python program by running it on more processors, with a minimal intervention by the programmer. The first, \href{https://modin.readthedocs.io/en/latest/index.html}{Modin}, is specifically meant for Pandas, and the second, \href{https://numba.pydata.org/}{Numba}, more generically for Python math operations, but none of them actually worked, the former because of some incompatibility with Windows OS, and the latter because it ``likes NumPy'' (as written \href{http://numba.pydata.org/numba-doc/latest/user/5minguide.html#will-numba-work-for-my-code}{in the docs}) but not Pandas. So, we decided to manually split the datasets and pass portions of them to a function launched in parallel on multiple processors by a \href{https://docs.python.org/3.6/library/multiprocessing.html#module-multiprocessing.pool}{process pool}, and this reduced the computation time to just few hours.
 
 We decided to apply our two estimators of the trustworthiness of the reviews (described in \nameref{sec:fake-rev}) to compute two additional version of the just described features, so we have three flavors for each of these features:
 \begin{enumerate}
@@ -148,7 +148,7 @@ We decided to apply our two estimators of the trustworthiness of the reviews (de
 
 \subsection{User-based collaborative approach}\label{sec:coll-appr}
 
-Then, we decided to add a new feature based on \textit{collaborative filtering}: the idea is that we have lots of reviews written by lots of users, so we can use the score given by similar user to similar restaurants to predict what a certain user will think about a restaurant he never tried before.
+Then, we decided to add a new feature based on \textit{collaborative filtering}: the idea is that we have lots of reviews written by lots of users, so we can use the score given by similar users to similar restaurants to predict what a certain user will think about a restaurant he never tried before.
 So we applied the following formula:
 \begin{equation}
     pred(u, r) = a_u + \frac{\sum_{u_i \in U} sim(u, u_i) * \left( a_{u_i, r} - a_r \right)} {\sum_{u_i \in U} sim(u, u_i)}
@@ -156,8 +156,8 @@ So we applied the following formula:
 where
 \begin{itemize}
 	\item[-] $a_u$ is the average of the votes given by the user $u$ to all the restaurants that share some cuisines with $r$ (i.e., the feature 3.2. between user $u$ and restaurant $r$ defined in section \nameref{sec:hist-feat}),
-	\item[-] $U$ is the set of all the users in the dataset, $u$ excluded,
-	\item[-] $a_{u_i, r}$ is the same as $a_u$, but for user $u_i$, so it is the value of the feature 3.2. for user $u_i$ and restaurant $r$,
+	\item[-] $U$ is the set of all the users in the dataset who wrote a review about $r$, $u$ excluded,
+	\item[-] $a_{u_i, r}$ is the average of all the votes given by $u_i \in U$ to $r$;
 	\item[-] $a_r$ is the average rating received by $r$ (i.e., the feature 2.1.),
 	\item[-] $sim(u, u_i)$ is computed as the cosine similarity between two vectors that represent the two users $u$ and $u_i$, composed by the values for the features 3.1. (one for each cuisine and one for each version, as explained in \nameref{sec:hist-feat}).
 \end{itemize}
@@ -169,7 +169,7 @@ We have three versions for this feature too, with the same meaning described in 
 At this point we had all the features we needed, so, that was the moment of preparing the data so that they were ready to be fed to the models. The next steps we performed were the following:
 \begin{enumerate}
 	\item We joined all the interesting datasets in only one, to have all the needed features together and one review per row (the \textit{checkin} dataset was discarded because not useful);
-	\item We added the label \texttt{likes} that holds a 1 if that user gave 4 or 5 stars in that review or 0 if he/she gave 1, 2 or 3 stars;
+	\item We added the label \texttt{likes} that holds a 1 if that user gave 4 or 5 stars in that review or 0 if he/she gave 1, 2 or 3 stars (the resulting labels distribution is shown in figures [\ref{fig:train-labels-distribution}] and [\ref{fig:test-labels-distribution}]);
 	\item We removed unnecessary columns sush as \texttt{review date, restaurant name, restaurant address, user name};
 	\item We applied some dimensionality reduction (more details on this later);
 	\item We filled missing values with the mode of the feature for the categorical values and with the mean for the numerical ones;
@@ -268,5 +268,23 @@ In the tables [\ref{tab:city-frequencies}] and [\ref{tab:category-frequencies}] 
 	}
 \end{table}
 
-When parameter tuning was finished and grid search wasn't needed anymore, we tried to fit the obtained models with the original dataset, without applying dimensionality reduction and restricting the potentially dangerous use of \texttt{OrdinalEncoder} \texttt{postal\_code} only, in order to see if we could get some improvement in performances of the models.\\
+When parameter tuning was finished and grid search wasn't needed anymore, we tried to fit the obtained models with the original dataset, without applying dimensionality reduction and restricting the potentially dangerous use of \texttt{OrdinalEncoder} \texttt{postal\_code} only, in order to see if we could get some improvement in the performances of the models.\\
 The procedure we followed and the results we obtained are explained in more detail in section \nameref{sec:experiments}.
+
+\hfill
+
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[scale=0.55]{train_labels_distribution}
+        \caption{Labels distribution in the train set}
+        \label{fig:train-labels-distribution}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[scale=0.55]{test_labels_distribution}
+        \caption{Labels distribution in the test set}
+        \label{fig:test-labels-distribution}
+    \end{minipage}
+\end{figure}

@@ -6,7 +6,7 @@
 
 We have devised a recommendation system for restaurants based on the \href{https://www.yelp.com/dataset/challenge}{Yelp Dataset Challenge}.
 
-Our aim is to predict if a certain user will like a certain restaurant, depending on characteristics of the restaurant, user's taste (derived from his previous reviews), opinion of similar users (who gave similar votes to similar restaurants), trustworthiness of the reviews.
+Our aim is to predict if a certain user will like a certain restaurant, depending on characteristics of the restaurant, user's tastes (derived from his previous reviews), opinion of similar users (who gave similar votes to similar restaurants), trustworthiness of the reviews.
 
 In order to do so, we studied three papers, that we used as the basis of our work:
 \begin{enumerate}
@@ -47,6 +47,6 @@ We summarize and motivate the tools used for this project:
 	\item \textbf{\href{https://www.tensorflow.org/}{TensorFlow GPU}}: it provides the implementations of neural networks.
 \end{itemize}
 
-Thus, most of our code is in the file \texttt{/src/main\_notebook.ipynb}, the functions that are explicitly run on many processes are in \texttt{src/multiproc\_utils.py}, the portion of preprocessing customized from [\ref{Hou}] is in \texttt{/src/recommendation\_system\_preprocessing.ipynb} and the model for finding deceptive reviews from [\ref{Zhang}] is in \texttt{/Yelp\_Sentiment\_Analysis/Scripts/fake\_reviews.ipynb}.
+Thus, most of our code is in the file \texttt{src/main\_notebook.ipynb}, the functions that are explicitly run on many processes are in \texttt{src/multiproc\_utils.py}, the portion of preprocessing customized from [\ref{Hou}] is in \texttt{src/recommendation\_system\_preprocessing.ipynb} and the model for finding deceptive reviews from [\ref{Zhang}] is in \texttt{Yelp\_Sentiment\_Analysis/Scripts/fake\_reviews.ipynb}.
 
 The machine used for running most of the code is an Asus notebook with Intel Core i7 processor with 6 physical cores (12 virtual cores), 16GB of RAM, Nvidia GeForce GTX 1050 GPU.

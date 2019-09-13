@@ -96,7 +96,7 @@ Our best results are shown in table [\ref{tab:svm-res-1}].
     \label{tab:svm-res-1}
 \end{table}
 
-Even if the results aren't extraordinary good, it has to be noticed that we registered a $4.79‬\%$ improvement in accuracy \wrt the best score obtained by Gandhe in [\ref{Gandhe}] with the same model, and we also have less overfitting, since the difference between our train and test score is $0.6\%$ while the difference between his scores is $3.37\%$.\\
+Even if the results aren't extraordinary good, it has to be noticed that we registered a 4.79‬\% improvement in accuracy \wrt the best score obtained by Gandhe in [\ref{Gandhe}] with the same model, and we also have less overfitting, since the difference between our train and test score is 0.6\% while the difference between his scores is 3.37\%.\\
 However, the improvement can't be completely ascribed to our richer preprocessing, since our dataset was bigger than the one used by Gandhe, because his paper was referred to the 2014 edition of the Yelp Dataset Challenge, while our work is based on the 2019 edition.
 
 
@@ -107,9 +107,9 @@ However, the improvement can't be completely ascribed to our richer preprocessin
 
 To implement the ensemble random forest method we used Scikit Learn's \href{https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}{RandomForestClassifier}.
 
-The main decision to take about the random forest is how to configure the parameters of the model, so we decided to perform a grid search (always using Scikit Learn's \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html}{GridSearchCV}) to find the best configuration of the main parameters. To create the parameter grid we were partially inspired by \href{https://www.kaggle.com/sociopath00/random-forest-using-gridsearchcv}{this kernel}.
+The main decision to take about the random forest is how to configure the parameters of the model, so we decided to perform a grid search (always using Scikit Learn's \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html}{GridSearchCV}) to find the best configuration of the main parameters. To create the parameter grid we were partially inspired by this kernel: \href{https://www.kaggle.com/sociopath00/random-forest-using-gridsearchcv}{Titanic Survival Predicton} [\ref{titanic}].
 
-We used two instances of RandomForestClassifier: one to make the grid search on half of the train set and one to train the model on the whole train set and make the predictions.
+We used two instances of RandomForestClassifier: one to perform the grid search on half of the train set and one to train the obtained model on the whole train set and make the predictions.
 
 The code used for the first instance of random forest and for grid search is the following:
 
@@ -174,7 +174,7 @@ predic = best_model.predict(test_set.drop(columns=['likes', 'stars_review',
 
 Since there were many parameters to choose, and therefore many tests to be executed by the \texttt{GridSearchCV}, we needed all the parallelism achievable with our machine, so we fed the grid search method with only half of the dataset, after observing that we got many memory errors trying with the whole train set.
 
-After more than three days of execution, the best train score we obtained was 0.745, then we trained the best estimator returned by \texttt{GridSearchCV} with the whole dataset, and, when used for computing predictions from the test set, it gave us the corresponding test score of 0.741.
+After more than three days of execution, the best train score we obtained was 0.745, then we trained the best estimator returned by \texttt{GridSearchCV} with the entire dataset, and, when used for computing predictions from the test set, it gave us the corresponding test score of 0.741.
 
 The details of those results are shown in table [\ref{tab:rf-res-1}].
 
@@ -244,9 +244,9 @@ classifier.compile(optimizer = 'adam',
                    metrics = ['accuracy'])
 \end{lstlisting}
 
-The first hidden layer is added to the model with the parameter \texttt{input\_dim=n\_features}, that represents the number of neurons per input layer needed (one per feature). The second and third hidden layers are added to the model without the previous parameter.
+The first hidden layer is added to the model with the parameter \texttt{input\_dim=n\_features}, that represents the number of neurons needed for the input layer (one per feature). The second and third hidden layers are added to the model without the previous parameter.
 
-The main decision to take for each hidden layer is the number of neurons that make it up; we decided to use the following formula (from \href{https://stats.stackexchange.com/questions/181/how-to-choose-the-number-of-hidden-layers-and-nodes-in-a-feedforward-neural-netw}{this thread} on StackExchange):
+The main decision to take for each hidden layer is the number of neurons that make it up; we decided to use the following formula (from the question \href{https://stats.stackexchange.com/questions/181/how-to-choose-the-number-of-hidden-layers-and-nodes-in-a-feedforward-neural-netw}{\textit{How to choose the number of hidden layers and nodes in a feedforward neural network?}} on StackExchange [\ref{stack}]):
 
 \begin{equation}
 N_h = \frac{N_s}{(\alpha * (N_i + N_o))}
@@ -503,7 +503,7 @@ In table [\ref{tab:nn-test-no-dim-red}] we summarize all the configurations of t
     \label{tab:nn-test-no-dim-red}
 \end{table}
 
-Fir the best test, the number 4, We present the code in listing [\ref{lst:nn-no-dim-red}] and some details in table [\ref{tab:nn-res-no-dim-red}].
+For the best test, the number 4, We present the code in listing [\ref{lst:nn-no-dim-red}] and some details in table [\ref{tab:nn-res-no-dim-red}].
 
 \begin{lstlisting}[caption={Neural Network without dimensionality reduction},label={lst:nn-no-dim-red}]
     classifier = Sequential()
@@ -786,7 +786,7 @@ The score obtained with Neural Network is 0.741:
     \label{tab:nn-res-std}
 \end{table}
 
-Even if there is a slight improvement in the results of the SVM and the Random forest, the Neural Network, that is our best model, gets worse, so overall we can say that the first version was better, since it allowed us to reach a higher score.
+Even if, \wrt the scores obtained in our first set of experiments ([\ref{sec:svm-no-dim-red}], [\ref{sec:rf-no-dim-red}], [\ref{sec:nn-no-dim-red}]), there is a slight improvement in the results of the SVM and the Random forest, the Neural Network, that is our best model, gets worse, so overall we can say that the first version was better, since it allowed us to reach a higher score.
 
 
 \newpage
@@ -900,4 +900,6 @@ The score obtained with Neural Network is 0.744:
     \label{tab:nn-res-real}
 \end{table}
 
-Similarly to what we said for the previous experiment, we can observe that one of the models, the Random Forest, gives a slightly higher result, but the others gets worse, expecially the SVM, therefore globally the first results are confirmed as the best.
+Similarly to what we said for the previous experiment, we can observe that one of the models, the Random Forest, gives a slightly higher result \wrt the one obtained in our first set of experiments ([\ref{sec:svm-no-dim-red}], [\ref{sec:rf-no-dim-red}], [\ref{sec:nn-no-dim-red}]), but the others gets worse, expecially the SVM, therefore globally the first results are confirmed as the best.
+
+We can also note that the results obtained with the \textit{real} features are better than those obtained with the \textit{standard} ones, except from those of the SVM, so we can conclude that it has been useful to introduce those new features.
